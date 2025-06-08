@@ -103,6 +103,51 @@ class Mem0Config(I18nMixin, BaseModel):
     }
 
 
+class AdvancedMemoryAgentConfig(I18nMixin, BaseModel):
+    """Configuration for the advanced memory agent with mem0 integration."""
+
+    llm_provider: Literal[
+        "openai_compatible_llm",
+        "claude_llm",
+        "llama_cpp_llm",
+        "ollama_llm",
+        "openai_llm",
+        "gemini_llm",
+        "zhipu_llm",
+        "deepseek_llm",
+        "groq_llm",
+        "mistral_llm",
+    ] = Field(..., alias="llm_provider")
+
+    faster_first_response: Optional[bool] = Field(True, alias="faster_first_response")
+    segment_method: Literal["regex", "pysbd"] = Field("pysbd", alias="segment_method")
+    user_id: str = Field("default_user", alias="user_id")
+    mem0_config: Mem0Config = Field(..., alias="mem0_config")
+
+    DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
+        "llm_provider": Description(
+            en="LLM provider to use for this agent",
+            zh="Advanced Memory Agent 智能体使用的大语言模型选项",
+        ),
+        "faster_first_response": Description(
+            en="Whether to respond as soon as encountering a comma in the first sentence to reduce latency (default: True)",
+            zh="是否在第一句回应时遇上逗号就直接生成音频以减少首句延迟（默认：True）",
+        ),
+        "segment_method": Description(
+            en="Method for segmenting sentences: 'regex' or 'pysbd' (default: 'pysbd')",
+            zh="分割句子的方法：'regex' 或 'pysbd'（默认：'pysbd'）",
+        ),
+        "user_id": Description(
+            en="Unique user ID for memory scoping (default: 'default_user')",
+            zh="用于内存范围的唯一用户ID（默认：'default_user'）",
+        ),
+        "mem0_config": Description(
+            en="Mem0 configuration for memory management",
+            zh="用于内存管理的 Mem0 配置",
+        ),
+    }
+
+
 # =================================
 
 
@@ -138,12 +183,18 @@ class AgentSettings(I18nMixin, BaseModel):
     basic_memory_agent: Optional[BasicMemoryAgentConfig] = Field(
         None, alias="basic_memory_agent"
     )
+    advanced_memory_agent: Optional[AdvancedMemoryAgentConfig] = Field(
+        None, alias="advanced_memory_agent"
+    )
     mem0_agent: Optional[Mem0Config] = Field(None, alias="mem0_agent")
     hume_ai_agent: Optional[HumeAIConfig] = Field(None, alias="hume_ai_agent")
 
     DESCRIPTIONS: ClassVar[Dict[str, Description]] = {
         "basic_memory_agent": Description(
             en="Configuration for basic memory agent", zh="基础记忆代理配置"
+        ),
+        "advanced_memory_agent": Description(
+            en="Configuration for advanced memory agent with mem0 integration", zh="具有 mem0 集成的高级记忆代理配置"
         ),
         "mem0_agent": Description(en="Configuration for Mem0 agent", zh="Mem0代理配置"),
         "hume_ai_agent": Description(
@@ -156,7 +207,7 @@ class AgentConfig(I18nMixin, BaseModel):
     """This class contains all of the configurations related to agent."""
 
     conversation_agent_choice: Literal[
-        "basic_memory_agent", "mem0_agent", "hume_ai_agent"
+        "basic_memory_agent", "advanced_memory_agent", "mem0_agent", "hume_ai_agent"
     ] = Field(..., alias="conversation_agent_choice")
     agent_settings: AgentSettings = Field(..., alias="agent_settings")
     llm_configs: StatelessLLMConfigs = Field(..., alias="llm_configs")

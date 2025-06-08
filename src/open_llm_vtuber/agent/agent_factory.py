@@ -3,6 +3,7 @@ from loguru import logger
 
 from .agents.agent_interface import AgentInterface
 from .agents.basic_memory_agent import BasicMemoryAgent
+from .agents.advanced_memory_agent import AdvancedMemoryAgent
 from .stateless_llm_factory import LLMFactory as StatelessLLMFactory
 from .agents.hume_ai import HumeAIAgent
 
@@ -65,6 +66,50 @@ class AgentFactory:
                     "faster_first_response", True
                 ),
                 segment_method=basic_memory_settings.get("segment_method", "pysbd"),
+                interrupt_method=interrupt_method,
+            )
+
+        elif conversation_agent_choice == "advanced_memory_agent":
+            # Get the advanced memory agent settings
+            advanced_memory_settings: dict = agent_settings.get("advanced_memory_agent", {})
+            llm_provider: str = advanced_memory_settings.get("llm_provider")
+
+            if not llm_provider:
+                raise ValueError("LLM provider not specified for advanced memory agent")
+
+            # Get the LLM config for this provider
+            llm_config: dict = llm_configs.get(llm_provider)
+            interrupt_method: Literal["system", "user"] = llm_config.pop(
+                "interrupt_method", "user"
+            )
+
+            if not llm_config:
+                raise ValueError(
+                    f"Configuration not found for LLM provider: {llm_provider}"
+                )
+
+            # Create the stateless LLM
+            llm = StatelessLLMFactory.create_llm(
+                llm_provider=llm_provider, system_prompt=system_prompt, **llm_config
+            )
+
+            # Get mem0 configuration
+            mem0_config = advanced_memory_settings.get("mem0_config")
+            if not mem0_config:
+                raise ValueError("mem0_config not specified for advanced memory agent")
+
+            # Create the advanced memory agent
+            return AdvancedMemoryAgent(
+                llm=llm,
+                system=system_prompt,
+                live2d_model=live2d_model,
+                mem0_config=mem0_config,
+                user_id=advanced_memory_settings.get("user_id", "default_user"),
+                tts_preprocessor_config=tts_preprocessor_config,
+                faster_first_response=advanced_memory_settings.get(
+                    "faster_first_response", True
+                ),
+                segment_method=advanced_memory_settings.get("segment_method", "pysbd"),
                 interrupt_method=interrupt_method,
             )
 
