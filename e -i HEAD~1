@@ -1,0 +1,463 @@
+[33mcommit 37be468e95d891a3feba100dabc776472b69f386[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: Gezicheng Guo <rg1022@ic.ac.uk>
+Date:   Fri Jun 13 15:34:32 2025 +0100
+
+    discord and telegram, only text works
+
+[33mcommit 9a47cd43f3c6d0c5c943529d8c8523d184b283fc[m[33m ([m[1;31morigin/v1-release[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Thu May 29 23:49:43 2025 +0800
+
+    🔖 Bump version to v1.1.4
+
+[33mcommit 63b354c911684f98a84105a8f3c45f60e82022ee[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Thu May 29 23:45:34 2025 +0800
+
+    Update frontend
+
+[33mcommit ebd216e7dc2c9bd0b9dc384fc2c9cdea6f168522[m
+Merge: 7d9d2e3 c4058a7
+Author: ylxmf <42771977+ylxmf2005@users.noreply.github.com>
+Date:   Tue May 13 09:26:51 2025 +0800
+
+    Merge pull request #207 from emmanuel-ferdman/main
+    
+    Migrate to modern Python Datetime API
+
+[33mcommit c4058a79cbe932a6831a4bc3210a87f3d319a0c2[m
+Author: Emmanuel Ferdman <emmanuelferdman@gmail.com>
+Date:   Mon May 12 08:55:11 2025 -0700
+
+    Migrate to modern Python Datetime API
+    
+    Signed-off-by: Emmanuel Ferdman <emmanuelferdman@gmail.com>
+
+[33mcommit 7d9d2e39b901f348ec58e0726d9b0e18c4d34921[m
+Merge: eafe4ec ef42f7e
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Thu May 1 22:32:14 2025 -0700
+
+    Merge pull request #197 from Y0oMu/main
+    
+    BUG FIX: OpenAI-Whisper
+
+[33mcommit ef42f7e1c38de1de60fc578b448551917e7dc069[m
+Author: y0omu <yejiayi2004@163.com>
+Date:   Fri May 2 13:02:05 2025 +0800
+
+    Fix: avoid incorrect resultsfrom whisper output dict
+
+[33mcommit 39a62f749bb6babdf03a7f3b2ee0c2bbc81352bd[m
+Author: y0omu <yejiayi2004@163.com>
+Date:   Fri May 2 13:00:33 2025 +0800
+
+    Fix: Ensure audio data type consistency to prevent dtype mismatch errors
+
+[33mcommit eafe4ecf09fdee1a64f88c5b2d4b70470601e84c[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sun Apr 27 02:01:36 2025 -0700
+
+    Update bug---question---get-help---bug---提问---求助.md
+    
+    Signed-off-by: Yi-Ting Chiu <mytim710@gmail.com>
+
+[33mcommit 18cf258bec8f35b0e6c666a1f622320df3368a4d[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sun Apr 27 01:54:51 2025 -0700
+
+    Update issue templates
+
+[33mcommit 67e1622891e264cc71b6da71533a3be188a09692[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Fri Apr 18 18:33:58 2025 -0700
+
+    🐛 [1.1.3] Fix merge_config encoding
+    
+    - Some Chinese users would get 乱码 when having the config merged with the merge config tool. This is because for some reason the default encoding of their computer is gbk something and not utf-8.
+
+[33mcommit 88c459e91573cafea1983d052e3508c98c45e206[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Tue Apr 8 19:25:59 2025 -0700
+
+    📄 Add contribution section in readme
+
+[33mcommit 7a8268364c121150c0595c0244f1f66fbbee668c[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Fri Feb 28 19:19:15 2025 -0700
+
+    Update conf.ZH.default.yaml
+
+[33mcommit 432e4f7be48ac6665d4e411b8f75992a571dcb7f[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Fri Feb 28 19:19:12 2025 -0700
+
+    ✨ Add: release actions to make release artifects
+    
+    Why
+    - I used to prepare the release zip files by hands. The process involves cloning repo with the frontend, fetching the sense voice model, remove the unquantized model to reduce the size, prepare the zh and en conf file, uploading them to cf r2, etc.
+    
+    ## What does this do?
+    This commit adds a github action to prepare release zip files. It prepares the zip files, fetch the frontend, put stuffs onto R2, and give us some links to download them. It's everything (except the release note) we need for a release.
+
+[33mcommit b5e6a680590979c7c7430e1a83a0e5ec5e8ccf0f[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Fri Feb 28 14:56:05 2025 -0700
+
+    ✨  Upgrade script 0.2.0: submodules, logging
+    
+    - bump project version to v1.1.2
+    - Better logging
+    - The upgrade script will now update the frontend linked via git submodule. Apparently this wasn't the case before and have caused confusions that after updating the project with the upgrade script, the frontend would be out-of-date. This is no longer the case
+
+[33mcommit 55cfcb73d770a826da1586c3d6de292bdaded305[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Tue Feb 25 11:41:32 2025 +0800
+
+    fix: improve style prompt
+
+[33mcommit 07dea43ac2c15eec167ec2a5ffd32d65cf1313d9[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 24 19:01:22 2025 -0700
+
+    🔖 Bump version to v1.1.1, ruff formatting
+
+[33mcommit 3d6eb0e7d37e3cbc85174f9308e3d99d97d932e8[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 24 18:58:16 2025 -0700
+
+    🐛 Fix claude image api format
+    
+    Claude Image probably never worked. This commit fix claude vision.
+    
+    # Why?
+    It never worked because the BasicMemoryAgent, when inserting images into the message list, it does so in OpenAI API format, which is different from how Claude does it.
+    
+    I fixed it by adding a converter to convert OpenAI format of image message to Claude api format.
+
+[33mcommit 2b3a67ff7177aedc0f2f50aea319791c9f84a44f[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 24 17:24:34 2025 -0700
+
+    ♻️ Clean up: break webtool routes into an independent function for clarity
+
+[33mcommit 758d0b304bfa9d2c561987e9d3edac74857309c7[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 24 12:33:06 2025 -0700
+
+    🐛 Fix attempt: replace all " with '
+    
+    - replace all double-quotes with single-quotes in default configuration files.
+    - use safe yaml loading for merge_config
+    - even if the sync config failed, we should proceed. The main server should not fail just because we couldn't sync the config file.
+    
+    # Why?
+    https://pd.qq.com/s/1bna5ufm6
+    
+    If the file path is enclosed by double-quotes, the yaml parser will recognize `\` as escape character and lead to an error. Changing double-quotes to single-quotes in yaml file for all file path could somewhat mitigate this problem.
+
+[33mcommit 2bc0c1b5f75ea79f563935b038a2267e6584d9bc[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Tue Feb 25 00:23:22 2025 +0800
+
+    fix(config): handle non-dict values in YAML config comparison
+
+[33mcommit 73d7610f67f2206482c1972912e98f60035878a6[m
+Author: ylxmf <42771977+ylxmf2005@users.noreply.github.com>
+Date:   Mon Feb 24 19:51:07 2025 +0800
+
+    add language detect for azure asr
+
+[33mcommit 7f780490a752e7d930726e2486f26bac6fd6af19[m
+Author: ylxmf <42771977+ylxmf2005@users.noreply.github.com>
+Date:   Mon Feb 24 19:51:07 2025 +0800
+
+    add language detect for azure asr
+
+[33mcommit b4ee470c1d71eaae25d76c295d52fbd0568bb68e[m
+Author: ylxmf <42771977+ylxmf2005@users.noreply.github.com>
+Date:   Mon Feb 24 18:49:51 2025 +0800
+
+    fix azure asr and add style prompt
+
+[33mcommit fd88dd38b5fa2b7a45002e6b61dac274536ce797[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sun Feb 23 11:18:37 2025 -0700
+
+    fix some default config options
+
+[33mcommit 6c816a3be033063b2a5322540f9b7d773e27ab6a[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sun Feb 23 07:59:52 2025 -0700
+
+    ignore non-default characer configs and backgrouds
+
+[33mcommit 10259ea478f0601e854bd19c1b92f8cf3b4b74a3[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Fri Feb 21 18:03:22 2025 -0700
+
+    Add github trending badge
+
+[33mcommit 3d6a313eb7b72c2f9366f15f1728efcea6cd529a[m[33m ([m[1;33mtag: [m[1;33mv1.1.0[m[33m)[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Tue Feb 18 05:14:51 2025 -0700
+
+    Update frontend
+
+[33mcommit 746ca240f0234ab5ae645f11e735f3cea5f68f18[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 17 16:03:55 2025 -0700
+
+    Update README
+
+[33mcommit 88b70b44f50f0a889702fcd3b41a1ffa0af3292e[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 17 09:14:29 2025 -0700
+
+    🔖 Bump version to 1.1.0
+
+[33mcommit ddec8264caebc7fcf538862821ce367ce7e1799b[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 17 15:32:40 2025 -0700
+
+    Live2D license notice
+
+[33mcommit 7df2b538e6936a16b321dc5d4ece13cb821bbcb3[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Mon Feb 17 10:08:07 2025 -0700
+
+    🎨 Chore: Ruff Formatting
+
+[33mcommit 460fe92537a2289e10a7cfcba82865c46729a883[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Mon Feb 17 02:42:35 2025 +0800
+
+    fix: improve sentence_divider
+
+[33mcommit 78b598bcc1377911981fd97ce433c8b92ee33902[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Sun Feb 16 16:33:24 2025 +0800
+
+    fix(tts): ensure silent payloads follow sequence order
+
+[33mcommit 75056bad096fd4ea240ec30cb68e442b0eece335[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Sun Feb 16 16:24:16 2025 +0800
+
+    fix: improve sentence divider and invalid tts detection
+
+[33mcommit 1aa51b5952242b0e31433e8de093cbbc2a16dd90[m
+Merge: d605ae1 79724a0
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 15 14:42:35 2025 -0700
+
+    Merge branch 'frontend-tool' into dev
+
+[33mcommit d605ae1ec2c161d04a946032a85337caddb40419[m
+Merge: 32b3a51 42c8d36
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 15 11:55:43 2025 -0700
+
+    Merge branch 'main' into dev
+
+[33mcommit 42c8d36af474273bcf35f152d8e0575e8037dd3b[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 15 09:31:15 2025 -0700
+
+    📝 Update roadmap link
+
+[33mcommit 32b3a518d6639d3b7b2bafed4a98fa8c46aa8307[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 15 08:07:13 2025 -0700
+
+    Rename `unity-audio-data` to `raw-audio-data`
+
+[33mcommit b3e9d8ccc6f05d0c3e49ffb9c567d5743acc8608[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 15 07:42:26 2025 -0700
+
+    🐛 Fix: encoding loading problems in upgrade and merge_configs
+    
+    the good encoding guessing mechanism was somehow not used in upgrade.py and merge_config.py. It's now added.
+
+[33mcommit c0b3cd9d711e719563446571c53b1b14041119cc[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 15 06:27:57 2025 -0700
+
+    🐛 attempt to fix locale on windows
+
+[33mcommit 71e6021d3ed5d66b184900a1051e39cebc6bf3d8[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Sat Feb 15 19:45:24 2025 +0800
+
+    fix: don't translate empty text and use English comment
+
+[33mcommit 79724a0471fd747319a001c9cfeb13742fa735c8[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 15 04:15:56 2025 -0700
+
+    ✨ Added frontend ASR/TTS tools, `/web-tool`
+    
+    # Web Tool
+    
+    ## Why?
+    The Open-LLM-VTuber project leverages TTS and ASR (speech recognition) models to deliver an immersive, voice-to-voice AI companion experience.
+    
+    While ASR and TTS technologies are powerful on their own, setting them up can be challenging. Previously, although our users installed the TTS and ASR models into our project, they were exclusively accessible as a part of the Open-LLM-VTuber's AI companion feature, preventing their use for other purposes like transcription or speech generation.
+    
+    ## What is Web Tool?
+    
+    This is a dedicated web page within the Open-LLM-VTuber backend that provides direct access to the ASR and TTS models initialized by the Open-LLM-VTuber server.
+    
+    Access the web page at: http://localhost:12393/web-tool. Note that the ASR and TTS models are the same ones you've set in the `conf.yaml` file, and switching models at runtime is not possible at this point.
+
+[33mcommit b977a036a91728f6a66351dffd7b87113ab617b7[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Thu Feb 13 13:52:09 2025 -0700
+
+    ✨ Add pre-commit
+
+[33mcommit e1e4ecc05cfd5cda3d3a9e22de71e2b167fb5218[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Thu Feb 13 17:28:38 2025 +0800
+
+    fix: unexpected cache config change
+
+[33mcommit 70bb6506f304293a713c3b5daa4600a3e9acd46f[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 22:28:02 2025 -0700
+
+    Fix: Check if user conf is up-to-date with defaults at launch
+    
+    ## Problem:
+    The user (mainly developers of this project) would use git instead of the upgrade script to sync the commits.  After untracked the conf.yaml from git, the user config is no longer synced. Without using the upgrade script, the user config will be out-of-date.
+    
+    This may lead to errors in configuration validation process.
+    
+    ## Solution:
+    We need to check if the user configuration is up-to-date with the default configuration every time we launch the backend and update the configuration if needed.
+    
+    We only compare the conf_version between the default and the user configuration
+
+[33mcommit 8b4b79d305070221876eebf8986f94e0255a1860[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 21:49:03 2025 -0700
+
+    🎨 Chore: Ruff Formatting
+
+[33mcommit 20caeb3852352d28c361464bbc2126d873d5870a[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 19:39:33 2025 -0700
+
+    ♻️ Improve upgrade script logging
+    
+    - use python logging module instead of print and file write
+
+[33mcommit dc98b007a9e957835a22bb6bbddaf0846fc4f58c[m
+Merge: 42231ee 402ab74
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 19:19:22 2025 -0700
+
+    Merge branch 'better_conf_upgrade' into merge
+
+[33mcommit 42231eeb8bfa6124ea5553bb3306fe9b3d614abc[m
+Merge: b787467 d253e50
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 19:19:15 2025 -0700
+
+    Merge branch 'pr/117' into merge
+
+[33mcommit 402ab74c10d3e21703c7b621592d7da81b850f48[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 13:23:09 2025 -0700
+
+    Update conf.ZH.default.yaml
+
+[33mcommit 568a30333b0b301eabcece792a29c122746b2405[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 13:18:32 2025 -0700
+
+    enhance upgrade log
+
+[33mcommit 5f4da6cf0660b1c88e6ee35fa49b230a4149aa2c[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Wed Feb 12 11:42:00 2025 -0700
+
+    Update: better lang detection for backend conf
+
+[33mcommit b787467c1e75dd4571a96a64aa1117a5aec59177[m
+Merge: b7a9bcd 0f70247
+Author: ylxmf <42771977+ylxmf2005@users.noreply.github.com>
+Date:   Wed Feb 12 00:55:11 2025 +0800
+
+    Merge pull request #122 from AnyaCoder/dev
+    
+    For Unity frontend
+    In the future, the Web frontend should also support handing VAD to the backend. Therefore, we can add new mic features (Wake Word Detection, Speaker Recognition) more conveniently.
+
+[33mcommit 0f7024757fb1531f20689f161620fba819ec6283[m
+Author: ylxmf <ethanelift@gmail.com>
+Date:   Wed Feb 12 00:49:12 2025 +0800
+
+    chore: English comment
+
+[33mcommit 72859c11c26724a0a0e705f444fea5e722d96eba[m
+Author: AnyaCoder <a2983352531@outlook.com>
+Date:   Wed Feb 12 00:08:53 2025 +0800
+
+    Add Silero-VAD into backend
+
+[33mcommit b7a9bcddab90b43c209bf0fb667bb00e2ad2eb70[m
+Merge: 8d7f257 9c77aa1
+Author: ylxmf <42771977+ylxmf2005@users.noreply.github.com>
+Date:   Tue Feb 11 18:05:37 2025 +0800
+
+    Merge pull request #119 from mokurin000/pixi-package
+    
+    One-click CUDA-ready setup with pixi
+
+[33mcommit 9c77aa1f802250da15373dfc5a3f254270056792[m
+Author: mokurin000 <1348292515a@gmail.com>
+Date:   Mon Feb 10 23:30:26 2025 +0800
+
+    chore: also update `uv.lock`
+
+[33mcommit ba0f244abd790ea899f92839ba03e78f39b0576c[m
+Author: mokurin000 <1348292515a@gmail.com>
+Date:   Mon Feb 10 23:24:58 2025 +0800
+
+    chore: update `pixi.lock` for `numpy<2`
+
+[33mcommit feab42a0f123aad870d7b49b7d620f08b019c6f7[m
+Author: 莯凛 <1348292515@qq.com>
+Date:   Mon Feb 10 23:23:09 2025 +0800
+
+    fix: include `numpy<2` for onnxruntime-gpu compatiblity
+    
+    Signed-off-by: 莯凛 <1348292515@qq.com>
+
+[33mcommit 67baee4918ba278579aaca8fd4d2b98d213d93a6[m
+Author: mokurin000 <1348292515a@gmail.com>
+Date:   Mon Feb 10 19:34:42 2025 +0800
+
+    chore: migrate conda dependencies to `[tool.pixi.dependencies]`
+    
+    - removed `faster-whisper`, which is not enabled by default
+
+[33mcommit a41c6c4c3393fdcd707b74582ae46a0ddcdb1e82[m
+Author: mokurin000 <1348292515a@gmail.com>
+Date:   Sun Feb 9 19:07:13 2025 +0800
+
+    chore: add linux-64 to supported platform
+
+[33mcommit fc10958c6d4573a842a826e87a627a9ce91d92b5[m
+Author: mokurin000 <1348292515a@gmail.com>
+Date:   Sun Feb 9 19:06:38 2025 +0800
+
+    build: package with pixi
+
+[33mcommit b1342cf69478b1e7653bbdeb173df1e63b08ef92[m
+Author: Yi-Ting Chiu <mytim710@gmail.com>
+Date:   Sat Feb 8 07:42:44 2025 -0700
+
+    ✨ Implemented merge config update
