@@ -201,42 +201,71 @@ The VTuber will respond with text and may include audio responses depending on t
         if chat_id not in self.chat_clients:
             await update.message.reply_text("❌ Not connected. Use /start to connect first.")
             return
-        
         try:
             # Send typing indicator
             await context.bot.send_chat_action(chat_id=chat_id, action="typing")
             
             # Get audio file
+            audio_type = "voice" if update.message.voice else "audio"
+            logger.info(f"Processing {audio_type} message from user {user_name} in chat {chat_id}")
+            
             if update.message.voice:
                 file = await context.bot.get_file(update.message.voice.file_id)
+                logger.info(f"Voice file details: file_id={update.message.voice.file_id}, duration={update.message.voice.duration}s")
             else:
                 file = await context.bot.get_file(update.message.audio.file_id)
+                logger.info(f"Audio file details: file_id={update.message.audio.file_id}, duration={getattr(update.message.audio, 'duration', 'unknown')}s, mime_type={getattr(update.message.audio, 'mime_type', 'unknown')}")
+            
+            logger.info(f"Downloaded file info: file_path={file.file_path}, file_size={file.file_size} bytes")
             
             # Download audio
             with tempfile.NamedTemporaryFile(suffix=".ogg", delete=False) as tmp_file:
+                logger.info(f"Downloading audio to temporary file: {tmp_file.name}")
                 await file.download_to_drive(tmp_file.name)
                 
+                # Check if file was downloaded successfully
+                if os.path.exists(tmp_file.name):
+                    file_size = os.path.getsize(tmp_file.name)
+                    logger.info(f"Audio file downloaded successfully: {file_size} bytes")
+                else:
+                    logger.error(f"Failed to download audio file to {tmp_file.name}")
+                    await update.message.reply_text("❌ Failed to download audio file.")
+                    return
+                
                 # Convert to required format (16kHz mono float32)
+                logger.info("Starting audio conversion to VTuber format...")
                 audio_data = self._convert_audio_to_vtuber_format(tmp_file.name)
-                  # Clean up temp file
+            
+            # Clean up temp file
+            try:
                 os.unlink(tmp_file.name)
+                logger.info("Temporary file cleaned up successfully")
+            except Exception as cleanup_error:
+                logger.warning(f"Failed to cleanup temporary file: {cleanup_error}")
             
             if audio_data is not None:
+                logger.info(f"Audio conversion successful. Array shape: {audio_data.shape}, dtype: {audio_data.dtype}")
                 # Send to VTuber
+                logger.info("Sending audio data to VTuber...")
                 success = await self.chat_clients[chat_id].send_audio_input(audio_data)
-                if not success:
+                if success:
+                    logger.info("Audio sent to VTuber successfully")
+                else:
+                    logger.error("Failed to send audio to VTuber")
                     await update.message.reply_text("❌ Failed to send audio to VTuber.")
             else:
-                await update.message.reply_text("❌ Error processing audio file.")
+                logger.error("Audio conversion failed - audio_data is None")
+                await update.message.reply_text("❌ Error processing audio file. Check logs for details.")
                 
         except Exception as e:
-            logger.error(f"Error handling audio: {e}")
-            await update.message.reply_text("❌ Error processing audio.")
-    
+            logger.error(f"Error handling audio message: {e}", exc_info=True)
+            await update.message.reply_text(f"❌ Error processing audio: {str(e)}")
+            return
+
     def _convert_audio_to_vtuber_format(self, audio_path: str) -> Optional[np.ndarray]:
         """
         Convert audio file to VTuber required format (16kHz mono float32)
-        
+
         Args:
             audio_path: Path to audio file
             
@@ -244,32 +273,66 @@ The VTuber will respond with text and may include audio responses depending on t
             np.ndarray: Audio data or None if conversion failed
         """
         try:
+            logger.info(f"Converting audio file: {audio_path}")
+            
+            # Check if file exists and has content
+            if not os.path.exists(audio_path):
+                logger.error(f"Audio file does not exist: {audio_path}")
+                return None
+            
+            file_size = os.path.getsize(audio_path)
+            if file_size == 0:
+                logger.error(f"Audio file is empty: {audio_path} (0 bytes)")
+                return None
+            
+            logger.info(f"Audio file size: {file_size} bytes")
+            
             # Load audio with pydub
+            logger.info("Loading audio with pydub...")
             audio = AudioSegment.from_file(audio_path)
+            logger.info(f"Audio loaded successfully - Duration: {len(audio)}ms, Channels: {audio.channels}, Frame rate: {audio.frame_rate}Hz, Sample width: {audio.sample_width} bytes")
             
             # Convert to mono
             if audio.channels > 1:
+                logger.info(f"Converting from {audio.channels} channels to mono")
                 audio = audio.set_channels(1)
             
             # Convert to 16kHz
             if audio.frame_rate != 16000:
+                logger.info(f"Resampling from {audio.frame_rate}Hz to 16000Hz")
                 audio = audio.set_frame_rate(16000)
             
             # Convert to numpy array (float32, normalized)
+            logger.info("Converting to numpy array...")
             audio_array = np.array(audio.get_array_of_samples(), dtype=np.float32)
+            logger.info(f"Raw audio array shape: {audio_array.shape}, dtype: {audio_array.dtype}")
             
             # Normalize to [-1, 1] range
             if audio.sample_width == 1:  # 8-bit
+                logger.info("Normalizing 8-bit audio")
                 audio_array = audio_array / 128.0
             elif audio.sample_width == 2:  # 16-bit
+                logger.info("Normalizing 16-bit audio")
                 audio_array = audio_array / 32768.0
             elif audio.sample_width == 4:  # 32-bit
+                logger.info("Normalizing 32-bit audio")
                 audio_array = audio_array / 2147483648.0
+            else:
+                logger.warning(f"Unknown sample width: {audio.sample_width} bytes, using 16-bit normalization")
+                audio_array = audio_array / 32768.0
+            
+            logger.info(f"Final audio array - Shape: {audio_array.shape}, dtype: {audio_array.dtype}, min: {audio_array.min():.3f}, max: {audio_array.max():.3f}")
             
             return audio_array
             
+        except FileNotFoundError as e:
+            logger.error(f"Audio file not found: {e}")
+            return None
+        except PermissionError as e:
+            logger.error(f"Permission denied accessing audio file: {e}")
+            return None
         except Exception as e:
-            logger.error(f"Error converting audio: {e}")
+            logger.error(f"Error converting audio: {type(e).__name__}: {e}", exc_info=True)
             return None
     
     async def send_text_response(self, chat_id: int, text: str):
@@ -288,7 +351,7 @@ The VTuber will respond with text and may include audio responses depending on t
             if display_text and display_text.get("text"):
                 await self.application.bot.send_message(
                     chat_id=chat_id, 
-                    text=f"🔊 {display_text['text']}"
+                    text=f"{display_text['text']}"
                 )
         except Exception as e:
             logger.error(f"Error sending audio response: {e}")

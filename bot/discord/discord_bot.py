@@ -201,8 +201,13 @@ class DiscordVTuberBot(commands.Bot):
         channel_id = message.channel.id
         user_name = message.author.display_name or message.author.name
         
+        logger.info(f"Processing message from user {user_name} in channel {channel_id}")
+        logger.info(f"Message content: '{message.content}'")
+        logger.info(f"Number of attachments: {len(message.attachments)}")
+        
         # Check if connected
         if channel_id not in self.channel_clients:
+            logger.warning(f"Channel {channel_id} not connected to VTuber")
             embed = discord.Embed(
                 title="❌ Not Connected",
                 description=f"Not connected to {self.character_name}. Use `{self.command_prefix}connect` to connect first.",
@@ -212,6 +217,7 @@ class DiscordVTuberBot(commands.Bot):
             return
         
         try:
+            logger.info("Starting message processing...")
             # Show typing indicator
             async with message.channel.typing():
                 
@@ -219,63 +225,131 @@ class DiscordVTuberBot(commands.Bot):
                 images = []
                 has_audio = False
                 
-                for attachment in message.attachments:
+                logger.info(f"Processing {len(message.attachments)} attachments...")
+                for i, attachment in enumerate(message.attachments):
+                    logger.info(f"Attachment {i+1}: filename='{attachment.filename}', content_type='{attachment.content_type}', size={attachment.size} bytes")
+                    
                     if attachment.content_type:
                         if attachment.content_type.startswith('image/'):
-                            # Download and convert image
-                            async with aiohttp.ClientSession() as session:
-                                async with session.get(attachment.url) as response:                                    image_bytes = await response.read()
-                            
-                            image_b64 = VTuberWebSocketClient.bytes_to_base64(
-                                image_bytes, attachment.content_type
-                            )
-                            images.append(image_b64)
+                            logger.info(f"Processing image attachment: {attachment.filename}")
+                            try:
+                                # Download and convert image
+                                async with aiohttp.ClientSession() as session:
+                                    logger.info(f"Downloading image from: {attachment.url}")
+                                    async with session.get(attachment.url) as response:
+                                        if response.status == 200:
+                                            image_bytes = await response.read()
+                                            logger.info(f"Image downloaded successfully: {len(image_bytes)} bytes")
+                                        else:
+                                            logger.error(f"Failed to download image: HTTP {response.status}")
+                                            continue
+                                
+                                logger.info("Converting image to base64...")
+                                image_b64 = VTuberWebSocketClient.bytes_to_base64(
+                                    image_bytes, attachment.content_type
+                                )
+                                images.append(image_b64)
+                                logger.info(f"Image converted successfully, base64 length: {len(image_b64)}")
+                                
+                            except Exception as img_error:
+                                logger.error(f"Error processing image {attachment.filename}: {img_error}", exc_info=True)
+                                await message.channel.send(f"❌ Error processing image {attachment.filename}: {str(img_error)}")
+                                continue
                             
                         elif attachment.content_type.startswith('audio/'):
+                            logger.info(f"Processing audio attachment: {attachment.filename}")
                             # Download and convert audio
                             has_audio = True
                             
-                            with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-                                await attachment.save(tmp_file.name)
-                                
-                                # Convert to required format
-                                audio_data = self._convert_audio_to_vtuber_format(tmp_file.name)
+                            try:
+                                with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{attachment.filename}") as tmp_file:
+                                    logger.info(f"Downloading audio to temporary file: {tmp_file.name}")
+                                    await attachment.save(tmp_file.name)
+                                    
+                                    # Check if file was downloaded successfully
+                                    if os.path.exists(tmp_file.name):
+                                        file_size = os.path.getsize(tmp_file.name)
+                                        logger.info(f"Audio file downloaded successfully: {file_size} bytes")
+                                    else:
+                                        logger.error(f"Failed to download audio file to {tmp_file.name}")
+                                        await message.channel.send("❌ Failed to download audio file.")
+                                        return
+                                    
+                                    # Convert to required format
+                                    logger.info("Starting audio conversion to VTuber format...")
+                                    audio_data = self._convert_audio_to_vtuber_format(tmp_file.name)
                                 
                                 # Clean up temp file
-                                os.unlink(tmp_file.name)
-                            
-                            if audio_data is not None:
-                                # Send audio to VTuber
-                                success = await self.channel_clients[channel_id].send_audio_input(
-                                    audio_data
-                                )
-                                if not success:
-                                    await message.channel.send("❌ Failed to send audio to VTuber.")
+                                try:
+                                    os.unlink(tmp_file.name)
+                                    logger.info("Temporary file cleaned up successfully")
+                                except Exception as cleanup_error:
+                                    logger.warning(f"Failed to cleanup temporary file: {cleanup_error}")
+                                
+                                if audio_data is not None:
+                                    logger.info(f"Audio conversion successful. Array shape: {audio_data.shape}, dtype: {audio_data.dtype}")
+                                    # Send audio to VTuber
+                                    logger.info("Sending audio data to VTuber...")
+                                    success = await self.channel_clients[channel_id].send_audio_input(
+                                        audio_data
+                                    )
+                                    if success:
+                                        logger.info("Audio sent to VTuber successfully")
+                                    else:
+                                        logger.error("Failed to send audio to VTuber")
+                                        await message.channel.send("❌ Failed to send audio to VTuber.")
+                                    return
+                                else:
+                                    logger.error("Audio conversion failed - audio_data is None")
+                                    await message.channel.send("❌ Error processing audio file. Check logs for details.")
+                                    return
+                                    
+                            except Exception as audio_error:
+                                logger.error(f"Error processing audio {attachment.filename}: {audio_error}", exc_info=True)
+                                await message.channel.send(f"❌ Error processing audio {attachment.filename}: {str(audio_error)}")
                                 return
-                            else:
-                                await message.channel.send("❌ Error processing audio file.")
-                                return
-                  # Handle text message (with optional images)
+                        else:
+                            logger.info(f"Skipping attachment with unsupported content type: {attachment.content_type}")
+                    else:
+                        logger.warning(f"Attachment {attachment.filename} has no content_type")
+                
+                # Handle text message (with optional images)
                 if not has_audio:
+                    logger.info("Processing text message...")
                     # Get message content, removing mentions
                     content = message.content
+                    original_content = content
                     if self.user in message.mentions:
                         content = content.replace(f'<@{self.user.id}>', '').strip()
+                        logger.info(f"Removed bot mention. Original: '{original_content}', Cleaned: '{content}'")
                     
                     if not content and not images:
                         content = "Hello!"  # Default message if only mention
+                        logger.info("No content and no images, using default greeting")
+                    
+                    logger.info(f"Final content to send: '{content}', Images: {len(images)}")
                     
                     if content or images:
-                        # Send to VTuber
-                        success = await self.channel_clients[channel_id].send_text_input(
-                            content, images if images else None
-                        )
-                        if not success:
-                            await message.channel.send("❌ Failed to send message to VTuber.")
+                        try:
+                            # Send to VTuber
+                            logger.info("Sending text/image input to VTuber...")
+                            success = await self.channel_clients[channel_id].send_text_input(
+                                content, images if images else None
+                            )
+                            if success:
+                                logger.info("Text/image sent to VTuber successfully")
+                            else:
+                                logger.error("Failed to send text/image to VTuber")
+                                await message.channel.send("❌ Failed to send message to VTuber.")
+                        except Exception as send_error:
+                            logger.error(f"Error sending text/image to VTuber: {send_error}", exc_info=True)
+                            await message.channel.send(f"❌ Error sending message to VTuber: {str(send_error)}")
+                    else:
+                        logger.info("No content to send (empty message)")
                 
         except Exception as e:
-            logger.error(f"Error handling user message: {e}")
-            await message.channel.send("❌ Error processing your message.")
+            logger.error(f"Error handling user message from {user_name}: {type(e).__name__}: {e}", exc_info=True)
+            await message.channel.send(f"❌ Error processing your message: {str(e)}")
     
     def _convert_audio_to_vtuber_format(self, audio_path: str) -> Optional[np.ndarray]:
         """
@@ -288,32 +362,66 @@ class DiscordVTuberBot(commands.Bot):
             np.ndarray: Audio data or None if conversion failed
         """
         try:
+            logger.info(f"Converting audio file: {audio_path}")
+            
+            # Check if file exists and has content
+            if not os.path.exists(audio_path):
+                logger.error(f"Audio file does not exist: {audio_path}")
+                return None
+            
+            file_size = os.path.getsize(audio_path)
+            if file_size == 0:
+                logger.error(f"Audio file is empty: {audio_path} (0 bytes)")
+                return None
+            
+            logger.info(f"Audio file size: {file_size} bytes")
+            
             # Load audio with pydub
+            logger.info("Loading audio with pydub...")
             audio = AudioSegment.from_file(audio_path)
+            logger.info(f"Audio loaded successfully - Duration: {len(audio)}ms, Channels: {audio.channels}, Frame rate: {audio.frame_rate}Hz, Sample width: {audio.sample_width} bytes")
             
             # Convert to mono
             if audio.channels > 1:
+                logger.info(f"Converting from {audio.channels} channels to mono")
                 audio = audio.set_channels(1)
             
             # Convert to 16kHz
             if audio.frame_rate != 16000:
+                logger.info(f"Resampling from {audio.frame_rate}Hz to 16000Hz")
                 audio = audio.set_frame_rate(16000)
             
             # Convert to numpy array (float32, normalized)
+            logger.info("Converting to numpy array...")
             audio_array = np.array(audio.get_array_of_samples(), dtype=np.float32)
+            logger.info(f"Raw audio array shape: {audio_array.shape}, dtype: {audio_array.dtype}")
             
             # Normalize to [-1, 1] range
             if audio.sample_width == 1:  # 8-bit
+                logger.info("Normalizing 8-bit audio")
                 audio_array = audio_array / 128.0
             elif audio.sample_width == 2:  # 16-bit
+                logger.info("Normalizing 16-bit audio")
                 audio_array = audio_array / 32768.0
             elif audio.sample_width == 4:  # 32-bit
+                logger.info("Normalizing 32-bit audio")
                 audio_array = audio_array / 2147483648.0
+            else:
+                logger.warning(f"Unknown sample width: {audio.sample_width} bytes, using 16-bit normalization")
+                audio_array = audio_array / 32768.0
+            
+            logger.info(f"Final audio array - Shape: {audio_array.shape}, dtype: {audio_array.dtype}, min: {audio_array.min():.3f}, max: {audio_array.max():.3f}")
             
             return audio_array
             
+        except FileNotFoundError as e:
+            logger.error(f"Audio file not found: {e}")
+            return None
+        except PermissionError as e:
+            logger.error(f"Permission denied accessing audio file: {e}")
+            return None
         except Exception as e:
-            logger.error(f"Error converting audio: {e}")
+            logger.error(f"Error converting audio: {type(e).__name__}: {e}", exc_info=True)
             return None
     
     async def send_text_response(self, channel_id: int, text: str):
@@ -340,7 +448,7 @@ class DiscordVTuberBot(commands.Bot):
                 # TODO: Implement audio playback if needed
                 display_text = data.get("display_text", {})
                 if display_text and display_text.get("text"):
-                    await channel.send(f"🔊 {display_text['text']}")
+                    await channel.send(f"{display_text['text']}")
         except Exception as e:
             logger.error(f"Error sending audio response: {e}")
     
