@@ -397,3 +397,23 @@ character_config:
         region: 'ap-guangzhou'
         source_lang: 'zh'
         target_lang: 'ja'
+
+
+
+      # =================== 机器人设置 ===================
+        # 您可以为多个机器人使用相同的角色，或为每个机器人创建不同的角色
+
+        # Telegram 机器人设置
+        telegram_bot_config:
+          telegram_bot_token: ''
+          vtuber_ws_url: 'ws://localhost:12393/client-ws'
+          character_name: 'Telegram 机器人'
+          log_level: 'INFO' # Telegram 机器人的日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+        # Discord 机器人设置
+        discord_bot_config:
+          discord_bot_token: ''
+          vtuber_ws_url: 'ws://localhost:12393/client-ws'
+          character_name: 'Discord 机器人'
+          command_prefix: '!' # Discord 中命令的前缀
+          log_level: 'INFO' # Discord 机器人的日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)

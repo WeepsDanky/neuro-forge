@@ -404,3 +404,23 @@ character_config:
         region: 'ap-guangzhou'
         source_lang: 'zh'
         target_lang: 'ja'
+
+
+      # =================== Bot Settings ===================
+      # You can use the same character for multiple bots, or create different characters for each bot
+
+      # Telegram Bot Settings
+        telegram_bot_config:
+          telegram_bot_token: ''
+          vtuber_ws_url: 'ws://localhost:12393/client-ws'
+          character_name: 'Telegram bot'
+          log_level: 'INFO' # Log level for Telegram bot (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+
+
+        # Discord Bot Settings
+        discord_bot_config:
+          discord_bot_token: ''
+          vtuber_ws_url: 'ws://localhost:12393/client-ws'
+          character_name: 'Discord bot'
+          command_prefix: '!' # The prefix for commands in Discord
+          log_level: 'INFO' # Log level for Discord bot (DEBUG, INFO, WARNING, ERROR, CRITICAL)
