@@ -1,3 +1,6 @@
+# ignore digest 
+digest.txt
+
 # ignore the user configuration file
 conf.yaml
 
