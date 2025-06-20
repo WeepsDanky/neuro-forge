@@ -11,6 +11,7 @@ Both bots support:
 - **Multiple conversations** - Each chat/channel has its own VTuber session
 - **Interruption support** - Stop the VTuber mid-conversation
 - **Connection management** - Connect/disconnect from VTuber sessions
+- **Proactive messaging** - Receive automatic messages from the VTuber based on time, events, or RSS feeds
 
 ## Directory Structure
 
@@ -129,11 +130,10 @@ The bots communicate with the VTuber WebSocket using these message types:
 {
   "type": "text-input",
   "text": "Hello VTuber!",
-  "from_name": "User",
   "images": [
     {
-      "source": "input",
-      "data": "data:image/jpeg;base64,...",
+      "source": "upload",
+      "data": "base64_data",
       "mime_type": "image/jpeg"
     }
   ]
@@ -147,8 +147,16 @@ The bots communicate with the VTuber WebSocket using these message types:
   "audio": [0.1, -0.2, 0.3, ...]
 }
 {
-  "type": "mic-audio-end",
-  "from_name": "User"
+  "type": "mic-audio-end"
+}
+```
+
+### Proactive Messages (Received)
+```json
+{
+  "type": "proactive_message",
+  "text": "Hi there! Just checking in. How are you doing?",
+  "source": "time_based"
 }
 ```
 

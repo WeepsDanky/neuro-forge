@@ -107,6 +107,7 @@ class DiscordVTuberBot(commands.Bot):
         # Setup event handlers
         client.on_text_response = lambda text: self.send_text_response(channel_id, text)
         client.on_audio_response = lambda audio, data: self.send_audio_response(channel_id, audio, data)
+        client.on_proactive_message = lambda text: self.handle_proactive_message(text)
         client.on_error = lambda error: self.send_error_message(channel_id, error)
         client.on_connection_established = lambda uid: self.send_connection_message(channel_id, uid)
         
@@ -479,6 +480,31 @@ class DiscordVTuberBot(commands.Bot):
                 await channel.send(embed=embed)
         except Exception as e:
             logger.error(f"Error sending connection message: {e}")
+    
+    async def handle_proactive_message(self, text: str):
+        """Handle proactive messages from the VTuber and broadcast to all connected channels"""
+        logger.info(f"Broadcasting proactive message to {len(self.channel_clients)} channels: {text}")
+        
+        # Send proactive message to all connected channels
+        for channel_id in list(self.channel_clients.keys()):
+            try:
+                channel = self.get_channel(channel_id)
+                if channel:
+                    embed = discord.Embed(
+                        title="🌟 Proactive Message",
+                        description=text,
+                        color=discord.Color.gold()
+                    )
+                    await channel.send(embed=embed)
+            except Exception as e:
+                logger.error(f"Failed to send proactive message to channel {channel_id}: {e}")
+                # Remove invalid channel connections
+                if channel_id in self.channel_clients:
+                    try:
+                        await self.channel_clients[channel_id].disconnect()
+                    except:
+                        pass
+                    del self.channel_clients[channel_id]
     
     async def start_bot(self):
         """Start the Discord bot"""

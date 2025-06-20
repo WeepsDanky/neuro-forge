@@ -32,6 +32,7 @@ class VTuberWebSocketClient:
         # Event handlers
         self.on_audio_response: Optional[Callable[[str, dict], Awaitable[None]]] = None
         self.on_text_response: Optional[Callable[[str], Awaitable[None]]] = None
+        self.on_proactive_message: Optional[Callable[[str], Awaitable[None]]] = None
         self.on_error: Optional[Callable[[str], Awaitable[None]]] = None
         self.on_connection_established: Optional[Callable[[str], Awaitable[None]]] = None
         
@@ -98,6 +99,12 @@ class VTuberWebSocketClient:
         elif msg_type == "audio":
             if self.on_audio_response:
                 await self.on_audio_response(data.get("audio", ""), data)
+                
+        elif msg_type == "proactive_message":
+            text = data.get("text", "")
+            if self.on_proactive_message and text:
+                logger.info(f"Received proactive message: {text}")
+                await self.on_proactive_message(text)
                 
         elif msg_type == "error":
             error_msg = data.get("message", "Unknown error")

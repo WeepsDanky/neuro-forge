@@ -5,6 +5,15 @@ Run this script to start the Telegram bot
 """
 import asyncio
 import os
+import sys
+from pathlib import Path
+
+# Add the project root to path for src imports, but don't add bot directory
+# to avoid conflicts with telegram package name
+project_root = Path(__file__).parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from bot.telegram.telegram_bot import TelegramVTuberBot
 from src.open_llm_vtuber.config_manager import Config, read_yaml, validate_config
 
@@ -27,6 +36,7 @@ def main():
     print(f"🚀 Starting Telegram VTuber Bot...")
     print(f"Character: {character_name}")
     print(f"VTuber Server: {vtuber_ws_url}")
+    print("✨ Proactive messaging enabled - bot will receive and forward proactive messages")
     
     # Create and run bot
     bot = TelegramVTuberBot(

@@ -69,6 +69,7 @@ class TelegramVTuberBot:
             # Setup event handlers
             client.on_text_response = lambda text: self.send_text_response(chat_id, text)
             client.on_audio_response = lambda audio, data: self.send_audio_response(chat_id, audio, data)
+            client.on_proactive_message = lambda text: self.handle_proactive_message(text)
             client.on_error = lambda error: self.send_error_message(chat_id, error)
             client.on_connection_established = lambda uid: self.send_connection_message(chat_id, uid)
             
@@ -376,6 +377,28 @@ The VTuber will respond with text and may include audio responses depending on t
             )
         except Exception as e:
             logger.error(f"Error sending connection message: {e}")
+    
+    async def handle_proactive_message(self, text: str):
+        """Handle proactive messages from the VTuber and broadcast to all connected chats"""
+        logger.info(f"Broadcasting proactive message to {len(self.chat_clients)} chats: {text}")
+        
+        # Send proactive message to all connected chats
+        for chat_id in list(self.chat_clients.keys()):
+            try:
+                await self.application.bot.send_message(
+                    chat_id=chat_id, 
+                    text=f"🌟 {text}",
+                    parse_mode=None
+                )
+            except Exception as e:
+                logger.error(f"Failed to send proactive message to chat {chat_id}: {e}")
+                # Remove invalid chat connections
+                if chat_id in self.chat_clients:
+                    try:
+                        await self.chat_clients[chat_id].disconnect()
+                    except:
+                        pass
+                    del self.chat_clients[chat_id]
     
     async def run(self):
         """Start the Telegram bot"""
