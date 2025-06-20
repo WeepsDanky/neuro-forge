@@ -27,6 +27,8 @@ from .conversations.conversation_handler import (
     handle_group_interrupt,
     handle_individual_interrupt,
 )
+from .proactive_manager import ProactiveChatManager
+from .event_sources import time_source, rss_source
 
 
 class MessageType(Enum):
@@ -72,6 +74,9 @@ class WebSocketHandler:
 
         # Message handlers mapping
         self._message_handlers = self._init_message_handlers()
+        
+        # Initialize proactive chat manager
+        self._init_proactive_chat()
 
     def _init_message_handlers(self) -> Dict[str, Callable]:
         """Initialize message type to handler mapping"""
@@ -94,6 +99,73 @@ class WebSocketHandler:
             "fetch-backgrounds": self._handle_fetch_backgrounds,
             "audio-play-start": self._handle_audio_play_start,
         }
+
+    def _init_proactive_chat(self):
+        """Initialize proactive chat manager with event sources"""
+        try:
+            # Get LLM config from default context - try different possible configurations
+            llm_cfg = None
+            if hasattr(self.default_context_cache, 'character_config') and \
+               hasattr(self.default_context_cache.character_config, 'agent_config') and \
+               hasattr(self.default_context_cache.character_config.agent_config, 'llm_configs'):
+                
+                llm_configs = self.default_context_cache.character_config.agent_config.llm_configs
+                # Try to get a working LLM config, prioritizing OpenAI compatible ones
+                for llm_name in ["openai_compatible_llm", "openai_llm", "ollama_llm"]:
+                    if llm_name in llm_configs:
+                        llm_cfg = {"llm_provider": llm_name, **llm_configs[llm_name]}
+                        break
+            
+            # Create proactive chat manager
+            self.proactive_mgr = ProactiveChatManager(
+                websocket_broadcast=self._broadcast_proactive_message,
+                llm_cfg=llm_cfg,
+                rule_text="🌟 Hi there! Just checking in. How are you doing?",
+                enabled=True,
+            )
+            
+            # Store event sources to start later when event loop is running
+            self._proactive_sources = [
+                time_source(interval_min=1),  # Send friendly message every minute
+                # Uncomment to add RSS source:
+                # rss_source("https://example.com/feed.xml", poll_sec=300),
+            ]
+            self._proactive_started = False
+            
+            logger.info("Proactive chat manager initialized successfully")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize proactive chat manager: {e}")
+            self.proactive_mgr = None
+
+    async def _start_proactive_chat_if_needed(self):
+        """Start proactive chat when first client connects"""
+        if hasattr(self, 'proactive_mgr') and self.proactive_mgr and not self._proactive_started:
+            try:
+                await self.proactive_mgr.start_detached(*self._proactive_sources)
+                self._proactive_started = True
+                logger.info("Proactive chat started successfully")
+            except Exception as e:
+                logger.error(f"Failed to start proactive chat: {e}")
+
+    async def _broadcast_proactive_message(self, message: dict):
+        """Broadcast proactive messages to all connected clients"""
+        try:
+            if not self.client_connections:
+                logger.debug("No clients connected for proactive message")
+                return
+                
+            # Broadcast to all connected clients
+            group_members = list(self.client_connections.keys())
+            await self.broadcast_to_group(
+                group_members=group_members,
+                message=message,
+            )
+            
+            logger.info(f"Broadcasted proactive message to {len(group_members)} clients")
+            
+        except Exception as e:
+            logger.error(f"Error broadcasting proactive message: {e}")
 
     async def handle_new_connection(
         self, websocket: WebSocket, client_uid: str
@@ -118,6 +190,9 @@ class WebSocketHandler:
             await self._send_initial_messages(
                 websocket, client_uid, session_service_context
             )
+
+            # Start proactive chat when first client connects
+            await self._start_proactive_chat_if_needed()
 
             logger.info(f"Connection established for client {client_uid}")
 
