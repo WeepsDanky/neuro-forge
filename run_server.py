@@ -72,7 +72,7 @@ def run(console_log_level: str):
     uvicorn.run(
         app=server.app,
         host=server_config.host,
-        port=server_config.port,
+        port=int(os.getenv("PORT", server_config.port)),
         log_level=console_log_level.lower(),
     )
 
