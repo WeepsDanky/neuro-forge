@@ -44,7 +44,8 @@ class VTuberWebSocketClient:
             bool: True if connected successfully, False otherwise
         """
         try:
-            self.websocket = await websockets.connect(self.ws_url)
+            # Disable compression to avoid issues with proxies that add "Transfer-Encoding" headers
+            self.websocket = await websockets.connect(self.ws_url, compression=None)
             self.is_connected = True
             logger.info(f"Connected to VTuber WebSocket: {self.ws_url}")
             
